@@ -12,25 +12,64 @@ import clubHonorsRouter from './routes/clubHonors.routes.js';
 import memberRoutes from "./routes/member.routes.js";
 import aboutRoutes from './routes/about.routes.js';
 import contactRoutes from './routes/contact.routes.js';
-
 import adminGetEmailRoutes from './routes/getEmail.routes.js';
-import  sendEmailRoutes from './routes/email.routes.js';
+import sendEmailRoutes from './routes/email.routes.js';
 import galleryRoutes from './routes/gallery.routes.js';
 import blogRoutes from './routes/blogpost.routes.js';
 
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 5000;
+
+// Global error handler for MongoDB timeouts
+app.use((req, res, next) => {
+  res.setTimeout(25000, () => {
+    res.status(504).json({ 
+      error: 'Request timeout',
+      message: 'Please try again later'
+    });
+  });
+  next();
+});
 
 app.use(cors({
-    origin: ['https://de32-37-111-165-214.ngrok-free.app',"http://localhost:5173", "http://localhost:5174",  "https://6663-37-111-178-85.ngrok-free.app", "http://localhost:5175"],
-  }));
-  app.use(express.json({ limit: '10mb' }));  
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+  origin: [
+    'https://de32-37-111-165-214.ngrok-free.app',
+    "http://localhost:5173", 
+    "http://localhost:5174",  
+    "https://6663-37-111-178-85.ngrok-free.app", 
+    "http://localhost:5175"
+  ],
+}));
+
+app.use(express.json({ limit: '10mb' }));  
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use("/uploads", express.static(path.join(path.resolve(), "uploads")));
 
-//end points routes
+// Connect to DB and then setup routes
+let isDBConnected = false;
+
+const initializeApp = async () => {
+  try {
+    if (!isDBConnected) {
+      await connectDB();
+      isDBConnected = true;
+      console.log("✅ Database connected successfully");
+    }
+  } catch (error) {
+    console.error("❌ Database connection failed:", error.message);
+  }
+};
+
+// Initialize app on first request
+app.use(async (req, res, next) => {
+  if (!isDBConnected) {
+    await initializeApp();
+  }
+  next();
+});
+
+// API routes
 app.use("/api/players", playerRoutes);
 app.use("/api/admin", superAdminRoutes);
 app.use("/api/slider", sliderRoutes);
@@ -44,10 +83,28 @@ app.use("/api/send", sendEmailRoutes);
 app.use("/api/email", adminGetEmailRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/blog", blogRoutes);
-    connectDB();
 
-// app.listen(PORT, () => {
-//     console.log(`[💻 ] Server is running on port ${PORT}`);
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'OK', 
+    dbConnected: isDBConnected,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Handle undefined routes
+// app.use('*', (req, res) => {
+//   res.status(404).json({ error: 'Route not found' });
 // });
+
+// Error handling middleware
+app.use((error, req, res, next) => {
+  console.error('Unhandled error:', error);
+  res.status(500).json({ 
+    error: 'Internal server error',
+    message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong'
+  });
+});
 
 export default app;
