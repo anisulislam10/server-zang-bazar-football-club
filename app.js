@@ -73,4 +73,4 @@ app.get('/api/health', (req, res) => {
 });
 
 // Export for Vercel (remove app.listen) 
-export default app;
+export default App;
