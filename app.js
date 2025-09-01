@@ -45,7 +45,8 @@ app.use("/api/email", adminGetEmailRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/blog", blogRoutes);
 
-app.listen(PORT, () => {
-    connectDB();
-    console.log(`[💻 ] Server is running on port ${PORT}`);
-});
+// app.listen(PORT, () => {
+//     connectDB();
+//     console.log(`[💻 ] Server is running on port ${PORT}`);
+// });
+export default app;
