@@ -38,7 +38,7 @@ app.use(cors({
     "http://localhost:5174",  
     "https://6663-37-111-178-85.ngrok-free.app", 
     "http://localhost:5175",
-    "https://client-zang-bazar-footbal-club.vercel.app"
+    "https://client-zang-bazar-footbal-club.vercel.app" 
   ],
 }));
 
