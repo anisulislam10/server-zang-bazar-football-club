@@ -23,7 +23,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-    origin: ['https://de32-37-111-165-214.ngrok-free.app',"http://localhost:5173", "http://localhost:5174",  "https://6663-37-111-178-85.ngrok-free.app", "http://localhost:5175"],
+    origin: ['https://de32-37-111-165-214.ngrok-free.app',"http://localhost:5173", "http://localhost:5174",  "https://6663-37-111-178-85.ngrok-free.app", "http://localhost:5175","https://client-zang-bazar-footbal-club.vercel.app"],
   }));
   app.use(express.json({ limit: '10mb' }));  
   app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -44,9 +44,8 @@ app.use("/api/send", sendEmailRoutes);
 app.use("/api/email", adminGetEmailRoutes);
 app.use("/api/gallery", galleryRoutes);
 app.use("/api/blog", blogRoutes);
-  connectDB();
-// app.listen(PORT, () => {
-//   
-//     console.log(`[💻 ] Server is running on port ${PORT}`);
-// });
-export default app;
+
+app.listen(PORT, () => {
+    connectDB();
+    console.log(`[💻 ] Server is running on port ${PORT}`);
+});
